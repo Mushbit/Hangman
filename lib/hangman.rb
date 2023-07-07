@@ -1,3 +1,5 @@
+require "pry-byebug"
+
 puts "Hangman Initialized!"
 
 
@@ -7,18 +9,18 @@ class Hangman
     @word = pick_word(clean_dict)
     @attempts_left = 10
     @correct_attempts = Array.new(@word.length) {"_"}
-    @incorrect_attempts = []
+    @incorrect_attempts = Array.new
   end
 
   def clean_dictionary(dirty_dict)
-    dirty_dict.split("\n").keep_if{|a| a.length > 4 && a.length < 13}
+    dirty_dict.split("\n").keep_if{ |a| a.length > 4 && a.length < 13 }
   end
 
   def pick_word(clean_dict)
     clean_dict[rand(0..clean_dict.length - 1)]
   end
 
-  def display_game
+  def display_game_progression
     text =
     "    #{@attempts_left}/10 attempts left.
     Guess this word: #{@correct_attempts.join(" ")}
@@ -30,18 +32,35 @@ class Hangman
 
   def ask_attempt
     puts "Choose a letter:"
-    char = check_attempt(gets.chomp)
+    char = check_attempt( gets.chomp.downcase )
   end
 
   def check_attempt(char)
-    if @word.split('').any?(char)
-      # Find index of char in @word and mofify @correct_attempts
-    elsif #it corresponds with @incorrect attempts
-      # Add char to @incorrect_attempts and puts "MWa MWa MWAAAAAA, try again dingwhole"
+    matched_char_indexes = []
+
+    @word.split('').each_index do |index|
+      # binding.pry
+      if @incorrect_attempts.any?( char ) || @correct_attempts.any?( char )
+        puts "That letter has already been used"
+        ask_attempt
+      elsif @word[index] == char
+        matched_char_indexes << index
+      end
+    end
+
+    if matched_char_indexes.any?
+      puts "Nice one!"
+      matched_char_indexes.each { |index| @correct_attempts[index] = char }
     else
-      # puts "That was an incorrect guess, please try again" and subtract 1 from @attempts_left
+      puts "Close, but no cigar"
+      @incorrect_attempts << char
+      @attempts_left -= 1
+    end
+    display_game_progression
+    ask_attempt
   end
 end
 
 hangman = Hangman.new
-hangman.display_game
+hangman.display_game_progression
+hangman.ask_attempt
