@@ -29,7 +29,6 @@ class Hangman
     puts text
   end
 
-
   def ask_attempt
     puts "Choose a letter:"
     char = check_attempt( gets.chomp.downcase )
@@ -39,7 +38,6 @@ class Hangman
     matched_char_indexes = []
 
     @word.split('').each_index do |index|
-      # binding.pry
       if @incorrect_attempts.any?( char ) || @correct_attempts.any?( char )
         puts "That letter has already been used"
         ask_attempt
@@ -47,7 +45,10 @@ class Hangman
         matched_char_indexes << index
       end
     end
+    display_result(matched_char_indexes)
+  end
 
+  def display_result(display_char_indexes)
     if matched_char_indexes.any?
       puts "Nice one!"
       matched_char_indexes.each { |index| @correct_attempts[index] = char }
@@ -58,6 +59,14 @@ class Hangman
     end
     display_game_progression
     ask_attempt
+  end
+
+  def check_win
+    puts "You win!" unless @correct_attempts.any?('_')
+  end
+
+  def check_loon
+    puts "You lose!" unless @attempts_left <= 0
   end
 end
 
