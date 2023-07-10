@@ -2,6 +2,33 @@ require "pry-byebug"
 
 puts "Hangman Initialized!"
 
+def run
+puts "Press enter to play"
+gets
+# puts "Would you like to continue where you left off? Y/n"
+# answer = gets.chomp.downcase
+# if answer == "y"
+#   Hangman.new(File.open("save.txt", r))
+#   hangman.display_game_progression
+#   hangman.ask_attempt
+# else
+hangman = Hangman.new
+hangman.display_game_progression
+hangman.ask_attempt
+# end
+end
+
+def reset
+  puts 'Want to play again? Y/n'
+  answer = gets.chomp.downcase
+  if answer == 'y'
+    hangman = Hangman.new
+    hangman.display_game_progression
+    hangman.ask_attempt
+  else
+    puts 'Type: "run" if you change your mind.'
+  end
+end
 
 class Hangman
   def initialize
@@ -61,47 +88,20 @@ class Hangman
       @attempts_left -= 1
     end
     display_game_progression
-    check_win
-    ask_attempt
+    ask_attempt unless check_win_condition
   end
 
-  def check_win
+  def check_win_condition
     if @correct_attempts.none?('_')
       puts "You win!"
       reset
+      true
     elsif@attempts_left <= 0
       puts "You lose!"
       reset
+      true
     end
   end
 end
 
-
-
-def run_game
-  puts "Press enter to play"
-gets
-# puts "Would you like to continue where you left off? Y/n"
-# answer = gets.chomp.downcase
-# if answer == "y"
-#   Hangman.new(File.open("save.txt", r))
-#   hangman.display_game_progression
-#   hangman.ask_attempt
-# else
-hangman = Hangman.new
-hangman.display_game_progression
-hangman.ask_attempt
-# end
-end
-
-def reset
-  puts 'Want to play again? Y/n'
-  answer = gets.chomp.downcase
-  if answer == 'y'
-    hangman = Hangman.new
-  else
-    puts 'Type: \"run_game\" if you change your mind.'
-  end
-end
-
-run_game
+run
