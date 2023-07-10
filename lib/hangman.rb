@@ -31,45 +31,77 @@ class Hangman
 
   def ask_attempt
     puts "Choose a letter:"
-    char = check_attempt( gets.chomp.downcase )
+    char = check_attempt_validity( gets.chomp.downcase )
   end
 
-  def check_attempt(char)
+  def check_attempt_validity(char)
     matched_char_indexes = []
 
     @word.split('').each_index do |index|
-      if @incorrect_attempts.any?( char ) || @correct_attempts.any?( char )
-        puts "That letter has already been used"
+      if char.match?(/^[a-z]$/)
+        if @incorrect_attempts.any?( char ) || @correct_attempts.any?( char )
+          puts "That letter has already been used"
+          ask_attempt
+        elsif @word[index] == char
+          matched_char_indexes << index
+        end
+      else
+        puts "The input may only consist of a single letter, please try again"
         ask_attempt
-      elsif @word[index] == char
-        matched_char_indexes << index
       end
     end
-    display_result(matched_char_indexes)
+    display_result(matched_char_indexes, char)
   end
 
-  def display_result(display_char_indexes)
+  def display_result(matched_char_indexes, char)
     if matched_char_indexes.any?
-      puts "Nice one!"
       matched_char_indexes.each { |index| @correct_attempts[index] = char }
     else
-      puts "Close, but no cigar"
       @incorrect_attempts << char
       @attempts_left -= 1
     end
     display_game_progression
+    check_win
     ask_attempt
   end
 
   def check_win
-    puts "You win!" unless @correct_attempts.any?('_')
-  end
-
-  def check_loon
-    puts "You lose!" unless @attempts_left <= 0
+    if @correct_attempts.none?('_')
+      puts "You win!"
+      reset
+    elsif@attempts_left <= 0
+      puts "You lose!"
+      reset
+    end
   end
 end
 
+
+
+def run_game
+  puts "Press enter to play"
+gets
+# puts "Would you like to continue where you left off? Y/n"
+# answer = gets.chomp.downcase
+# if answer == "y"
+#   Hangman.new(File.open("save.txt", r))
+#   hangman.display_game_progression
+#   hangman.ask_attempt
+# else
 hangman = Hangman.new
 hangman.display_game_progression
 hangman.ask_attempt
+# end
+end
+
+def reset
+  puts 'Want to play again? Y/n'
+  answer = gets.chomp.downcase
+  if answer == 'y'
+    hangman = Hangman.new
+  else
+    puts 'Type: \"run_game\" if you change your mind.'
+  end
+end
+
+run_game
