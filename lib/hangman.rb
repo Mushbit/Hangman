@@ -9,7 +9,8 @@ class Game
     answer = gets.chomp.downcase
     if answer == "y"
       binding.pry
-      Hangman.new(JSON.load("hangman_save.json"))
+      save_file = File.open('hangman_save.json', 'r')
+      Hangman.new(JSON.load(save_file))
       hangman.display_game_progression
       hangman.ask_attempt
     else
@@ -35,8 +36,7 @@ end
 
 class Hangman
   def initialize
-    @dictionary = clean_dictionary(File.read('google-10000-english.txt'))
-    @word = pick_word(clean_dict)
+    @word = pick_word(clean_dictionary(File.read('google-10000-english.txt')))
     @attempts_left = 10
     @correct_attempts = Array.new(@word.length) {"_"}
     @incorrect_attempts = Array.new
@@ -44,7 +44,6 @@ class Hangman
 
   def to_json
     JSON.dump ({
-      :dictionary => @dictionary,
       :word => @word,
       :attempts_left => @attempts_left,
       :correct_attempts => @correct_attempts,
@@ -115,10 +114,12 @@ class Hangman
 
   def check_win_condition
     if @correct_attempts.none?('_')
+      binding.pry
       puts "You win!"
       Game.reset
       true
     elsif@attempts_left <= 0
+      binding.pry
       puts "You lose!"
       Game.reset
       true
