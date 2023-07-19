@@ -11,9 +11,9 @@ class Game
   end
 
   def launch
-    puts "Would you like to continue where you left off? Y/n"
+    puts 'Would you like to continue where you left off? Y/n'
     answer = gets.chomp.downcase
-    if answer == "y"
+    if answer == 'y'
       save_file = JSON.load(File.read('hangman_save.json'))
       hangman.load_game(save_file)
       # have Hangman class accept arguments OR create a self initializing method within the class...interesting!
@@ -27,10 +27,10 @@ class Game
     until hangman.check_game_over_condition do
       hangman.save_game
 
-      char = hangman.ask_attempt
-      binding.pry
+      # binding.pry
       # working on it right here
-      matched_char_indexes = hangman.check_attempt_validity(char) unless hangman.check_attempt_validity(char)
+      char = hangman.ask_attempt
+      next unless matched_char_indexes = hangman.check_attempt_validity(char)
       hangman.update_game_state(matched_char_indexes, char)
       hangman.display_game_progression
     end
@@ -101,24 +101,24 @@ class Hangman
   end
 
   def ask_attempt
-    puts "Choose a letter:"
-    gets.chomp.downcase
+    begin
+      puts "Choose a letter:"
+    gets.downcase.match(/^[a-z]$/)[0]
+    rescue
+      puts 'Remember, a single letter only'
+      retry
+    end
   end
 
   # Returns false upon failure.
   def check_attempt_validity(char)
     matched_char_indexes = []
     @word.split('').each_index do |index|
-      if char.match?(/^[a-z]$/)
-        if @incorrect_attempts.any?( char ) || @correct_attempts.any?( char )
-          puts "That letter has already been used, please try again"
-          return false
-        elsif @word[index] == char
-          matched_char_indexes << index
-        end
-      else
-        puts "The input may only consist of a single letter, please try again"
+      if @incorrect_attempts.any?( char ) || @correct_attempts.any?( char )
+        puts "That letter has already been used, please try again"
         return false
+      elsif @word[index] == char
+        matched_char_indexes << index
       end
     end
     matched_char_indexes
@@ -126,7 +126,6 @@ class Hangman
 
   def update_game_state(matched_char_indexes, char)
     if matched_char_indexes.any?
-
       matched_char_indexes.each { |index| @correct_attempts[index] = char }
     else
       @incorrect_attempts << char
